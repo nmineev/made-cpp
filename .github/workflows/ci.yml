@@ -18,7 +18,4 @@ jobs:
         run: clang-tidy include/matrix_calc.cpp -extra-arg=-std=c++17
       - name: Run tests
         working-directory: ./hw02/build
-        run: |
-        ./tests/test_matrix_calc
-        && lcov -t "tests/tests_fib" -o coverage.info -c -d tests/
-        && genhtml -o report coverage.info && mv report ../tests/reports
+        run: ./tests/test_matrix_calc && lcov -t "tests/tests_fib" -o coverage.info -c -d tests/ && genhtml -o report coverage.info && mv report ../tests/reports
