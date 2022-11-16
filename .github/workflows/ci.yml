@@ -11,9 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install dependencies
-        run: |
-          sudo apt-get update &&
-          apt-get install -y lcov genhtml
+        run: apt install -y lcov
       - name: Build
         working-directory: ./hw02
         run: mkdir build && cd build && cmake .. && cmake --build .
