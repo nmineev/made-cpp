@@ -36,19 +36,38 @@
 #
 #add_subdirectory(tests)
 
+#cmake_minimum_required(VERSION 3.0.0)
+#project(matrix)
+#
+#add_subdirectory(include)
+#
+#message("MATRIX_LIB_INCLUDE_DIRS = ${MATRIX_LIB_INCLUDE_DIRS}")
+#message("MATRIX_LIB_LIBRARIES = ${MATRIX_LIB_LIBRARIES}")
+#
+#add_executable(${PROJECT_NAME} app/main.cpp)
+#
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -coverage -lgcov" )
+#
+#target_include_directories(${PROJECT_NAME} PUBLIC ${MATRIX_LIB_INCLUDE_DIRS})
+#target_link_libraries(${PROJECT_NAME} PRIVATE ${MATRIX_LIB_LIBRARIES})
+#
+#add_subdirectory(tests)
+
+
 cmake_minimum_required(VERSION 3.0.0)
-project(matrix)
+project(matrix_calc)
 
 add_subdirectory(include)
 
-message("MATRIX_LIB_INCLUDE_DIRS = ${MATRIX_LIB_INCLUDE_DIRS}")
-message("MATRIX_LIB_LIBRARIES = ${MATRIX_LIB_LIBRARIES}")
+message("MATRIX_CALC_LIB_INCLUDE_DIRS = ${MATRIX_CALC_LIB_INCLUDE_DIRS}")
+message("MATRIX_CALC_LIB_LIBRARIES = ${MATRIX_CALC_LIB_LIBRARIES}")
 
-add_executable(${PROJECT_NAME} app/main.cpp)
+add_executable(${PROJECT_NAME} main.cpp)
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -coverage -lgcov" )
+#set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fprofile-arcs -ftest-coverage -fPIC -O0")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -coverage -lgcov -fprofile-arcs -ftest-coverage" )
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${MATRIX_LIB_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${MATRIX_LIB_LIBRARIES})
+target_include_directories(${PROJECT_NAME} PUBLIC ${MATRIX_CALC_LIB_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${MATRIX_CALC_LIB_LIBRARIES})
 
 add_subdirectory(tests)
