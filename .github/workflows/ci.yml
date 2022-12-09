@@ -5,46 +5,33 @@ on:
   pull_request:
 
 jobs:
-  build-and-test:
-
-    name: ${{ matrix.toolchain }}
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        toolchain:
-          - linux-gcc
-          - macos-clang
-          - windows-msvc
-
-        configuration:
-          - Debug
-
-        include:
-          - toolchain: linux-gcc
-            os: ubuntu-latest
-            compiler: gcc
-
-          - toolchain: macos-clang
-            os: macos-latest
-            compiler: clang
-
-          - toolchain: windows-msvc
-            os: windows-latest
-            compiler: msvc
-
+  build:
+    runs-on: ubuntu-latest
+    container: leshiy1295/gcc_linters_valgrind_cmake_gtest
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v2
-
-    - name: Configure (${{ matrix.configuration }})
-      run: cmake -S . -Bbuild -DCMAKE_BUILD_TYPE=${{ matrix.configuration }}
-
-    - name: Build with ${{ matrix.compiler }}
-      run: cmake --build build --config ${{ matrix.configuration }}
-
-    - name: Test
-      working-directory: build
-      env:
-        CTEST_OUTPUT_ON_FAILURE: 1
-      run: ctest -C ${{ matrix.configuration }}
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install dependencies
+        run: apt install -y lcov
+      - name: Build
+        working-directory: ./hw03
+        run: mkdir build && cd build && cmake .. && cmake --build .
+      - name: Lint with clang-tidy
+        working-directory: ./hw03
+        run: clang-tidy include/set.cpp -extra-arg=-std=c++17
+      - name: Run tests
+        working-directory: ./hw03/build
+        run: |
+          ./tests/test_set
+          lcov --capture -d . -o coverage.info
+          lcov --remove coverage.info '/usr/*' -o coverage.info
+          lcov --remove coverage.info '*/hw03/tests/*' -o coverage.info
+          lcov --list coverage.info
+      - name: Create test coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./hw03/build/coverage.info
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          verbose: true
