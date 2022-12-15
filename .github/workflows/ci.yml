@@ -5,46 +5,35 @@ on:
   pull_request:
 
 jobs:
-  build-and-test:
-
-    name: ${{ matrix.toolchain }}
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        toolchain:
-          - linux-gcc
-          - macos-clang
-          - windows-msvc
-
-        configuration:
-          - Debug
-
-        include:
-          - toolchain: linux-gcc
-            os: ubuntu-latest
-            compiler: gcc
-
-          - toolchain: macos-clang
-            os: macos-latest
-            compiler: clang
-
-          - toolchain: windows-msvc
-            os: windows-latest
-            compiler: msvc
-
+  build:
+    runs-on: ubuntu-latest
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v2
-
-    - name: Configure (${{ matrix.configuration }})
-      run: cmake -S . -Bbuild -DCMAKE_BUILD_TYPE=${{ matrix.configuration }}
-
-    - name: Build with ${{ matrix.compiler }}
-      run: cmake --build build --config ${{ matrix.configuration }}
-
-    - name: Test
-      working-directory: build
-      env:
-        CTEST_OUTPUT_ON_FAILURE: 1
-      run: ctest -C ${{ matrix.configuration }}
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+          sudo apt update -y
+          sudo apt install -y cppcheck clang-tidy python3-pip libc6-dbg cmake libgtest-dev build-essential
+          sudo apt install -y libboost-all-dev lcov
+      - name: Build
+        working-directory: ./hw04
+        run: mkdir build && cd build && cmake .. && cmake --build .
+#      - name: Lint with clang-tidy
+#        working-directory: ./hw04
+#        run: clang-tidy main.cpp utils/main.cpp utils/is_optimistic_from_stdin.cpp utils/is_optimistic.cpp tests/test_is_optimistic.cpp is_optimistic_synchronized/is_optimistic_synchronized.hpp is_optimistic_parallelized/is_optimistic_parallelized.hpp -extra-arg=-std=c++17
+      - name: Run tests
+        working-directory: ./hw04/build
+        run: |
+          ./tests/test_dialog_optimism_checkers
+          lcov --capture -d . -o coverage.info
+          lcov --remove coverage.info '/usr/*' -o coverage.info
+          lcov --remove coverage.info '*/hw04/tests/*' -o coverage.info
+          lcov --list coverage.info
+      - name: Create test coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./hw04/build/coverage.info
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          verbose: true
